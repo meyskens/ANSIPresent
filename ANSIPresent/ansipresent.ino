@@ -11,6 +11,8 @@
 void (*functionPtrs[slideTotal])(); //the array of function pointers
 int slideCount = 0;
 
+int lastInterupt = 0;
+
 using namespace ANSI;
 
 SoftwareSerial remoteSerial(11, 10); // RX, TX
@@ -19,8 +21,8 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT); // debug led
   pinMode(2, INPUT_PULLUP);
   pinMode(3, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(2), showSlide, FALLING); // emergency next button
-  attachInterrupt(digitalPinToInterrupt(3), showSlide, FALLING); // emergency back button
+  attachInterrupt(digitalPinToInterrupt(2), interuptNext, RISING); // emergency next button
+  attachInterrupt(digitalPinToInterrupt(3), interuptBack, RISING); // emergency back button
 
   Serial.begin(115200);
   remoteSerial.begin(2400);
@@ -62,6 +64,20 @@ void loop() {
     showSlide();
   }
   if (c.indexOf("back") > -1) {
+    goBackSlide();
+  }
+}
+
+void interuptNext() {
+  if (lastInterupt - millis() > 1000) {
+    lastInterupt = millis();
+    showSlide();
+  }
+}
+
+void interuptBack() {
+  if (lastInterupt - millis() > 1000) {
+    lastInterupt = millis();
     goBackSlide();
   }
 }
